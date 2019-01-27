@@ -1,0 +1,12 @@
+server:
+  port: 9090
+spring:
+  datasource:
+    username: root
+    password: szU@654321
+    url: jdbc:mysql://210.39.12.25:50002/predict?useUnicode=true&characterEncoding=utf-8
+    driver-class-name: com.mysql.jdbc.Driver
+
+mybatis:
+  mapper-locations: mapper/*.xml
+  type-aliases-package: com.java.fiance.entity

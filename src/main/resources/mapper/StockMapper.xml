@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.java.fiance.mapper.StockMapper">
+    <resultMap id="stock" type="com.java.fiance.entity.Stock">
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="stockChosen" type="com.java.fiance.entity.StockChosen">
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="stockSpell" type="com.java.fiance.entity.StockSpell">
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="letter" property="spell" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="stockPredict" type="com.java.fiance.entity.StockPredict">
+        <result column="date" property="date" jdbcType="VARCHAR"/>
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="loss" property="loss" jdbcType="DOUBLE"/>
+        <result column="high1" property="high1" jdbcType="DOUBLE"/>
+        <result column="high2" property="high2" jdbcType="DOUBLE"/>
+        <result column="high3" property="high3" jdbcType="DOUBLE"/>
+        <result column="high4" property="high4" jdbcType="DOUBLE"/>
+        <result column="high5" property="high5" jdbcType="DOUBLE"/>
+        <result column="low1" property="low1" jdbcType="DOUBLE"/>
+        <result column="low2" property="low2" jdbcType="DOUBLE"/>
+        <result column="low3" property="low3" jdbcType="DOUBLE"/>
+        <result column="low4" property="low4" jdbcType="DOUBLE"/>
+        <result column="low5" property="low5" jdbcType="DOUBLE"/>
+    </resultMap>
+
+    <sql id="predictFields">
+        date, code, name, loss, high1, high2, high3, high4, high5, low1, low2, low3, low4, low5
+    </sql>
+    <!--获得用户自选股列表-->
+    <select id="getStockById" resultMap="stock">
+        SELECT code, name FROM Optional_stock
+        WHERE user_id=#{userId}
+    </select>
+
+    <!--获得访问前20的股票-->
+    <select id="getStocksTop20" resultMap="stockChosen">
+        SELECT code, name FROM stock_code_name_update
+        ORDER BY #{updateTime}
+        DESC
+        limit 20
+    </select>
+
+    <!--用户添加自选股-->
+    <insert id="addStock" timeout="3000">
+        INSERT INTO Optional_stock
+        VALUES (#{userId}, #{code}, #{name})
+    </insert>
+
+    <!--用户取消自选股-->
+    <delete id="deleteStock" timeout="3000">
+        DELETE FROM Optional_stock
+        WHERE code=#{code}
+        and user_id=#{userId}
+    </delete>
+
+    <!--获取股票预测结果-->
+    <select id="getStockPredict" resultMap="stockPredict">
+        SELECT <include refid="predictFields"/> FROM ${dataTable}
+        ORDER BY date
+        DESC
+        LIMIT 1
+    </select>
+
+    <!--获取所有股票列表-->
+    <select id="getAllStocks" resultMap="stockSpell">
+        SELECT code, name, letter FROM stock_code_name
+    </select>
+
+    <update id="updateAllStocks" timeout="3000">
+        UPDATE stock_code_name SET letter=
+        <foreach item="item" collection="list" separator=" " open="case code" close="end" index="index">
+            WHEN #{item.code} THEN #{item.spell}
+        </foreach>
+        where code in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item.code}
+        </foreach>
+    </update>
+
+    <!--判断股票是否为用户自选股-->
+    <select id="checkStock" resultMap="stock">
+        SELECT code, name FROM Optional_stock
+        WHERE user_id = #{userId}
+        AND code = #{code}
+    </select>
+
+</mapper>
