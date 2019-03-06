@@ -53,13 +53,13 @@
     </select>
 
     <!--用户添加自选股-->
-    <insert id="addStock" timeout="3000">
+    <insert id="addStock" timeout="5000">
         INSERT INTO Optional_stock
         VALUES (#{userId}, #{code}, #{name})
     </insert>
 
     <!--用户取消自选股-->
-    <delete id="deleteStock" timeout="3000">
+    <delete id="deleteStock" timeout="5000">
         DELETE FROM Optional_stock
         WHERE code=#{code}
         and user_id=#{userId}
@@ -78,7 +78,7 @@
         SELECT code, name, letter FROM stock_code_name
     </select>
 
-    <update id="updateAllStocks" timeout="3000">
+    <update id="updateAllStocks" timeout="5000">
         UPDATE stock_code_name SET letter=
         <foreach item="item" collection="list" separator=" " open="case code" close="end" index="index">
             WHEN #{item.code} THEN #{item.spell}

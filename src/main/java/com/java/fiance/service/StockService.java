@@ -16,7 +16,7 @@ public interface StockService {
      * @param userId
      * @return
      */
-    List<Stock> getStockByUserId(String userId);
+    Object getStockByUserId(String userId);
 
     /**
      * 用户添加自选股
@@ -40,20 +40,20 @@ public interface StockService {
      * @param userId
      * @return
      */
-    List<StockChosen> getStocksTop20(String userId);
+    Object getStocksTop20(String userId);
 
     /**
      * 获得预测结果
      * @param code
      * @return
      */
-    StockPredict getStockPredict(String code);
+    Object getStockPredict(String code);
 
     /**
      * 获得所有股票信息
      * @return
      */
-    List<StockSpell> getAllStocks();
+    Object getAllStocks();
 
     /**
      * 为所有股票配置拼音首字母
