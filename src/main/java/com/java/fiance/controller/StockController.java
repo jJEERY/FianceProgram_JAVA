@@ -1,8 +1,5 @@
 package com.java.fiance.controller;
 
-import com.java.fiance.entity.Stock;
-import com.java.fiance.entity.StockChosen;
-import com.java.fiance.entity.StockSpell;
 import com.java.fiance.service.StockService;
 import net.sf.json.JSONObject;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +26,7 @@ public class StockController {
      */
     @GetMapping("/getStockById")
     public Object getStockById(@RequestParam("userId") String userId) {
-        List<Stock> stockList = stockService.getStockByUserId(userId);
+        Object stockList = stockService.getStockByUserId(userId);
         return stockList;
     }
 
@@ -82,7 +79,7 @@ public class StockController {
      */
     @GetMapping("/getStockTop20")
     public Object getStockTop20(@RequestParam("userId") String userId) {
-        List<StockChosen> list =  stockService.getStocksTop20(userId);
+        Object list =  stockService.getStocksTop20(userId);
         return list;
     }
 
@@ -102,7 +99,7 @@ public class StockController {
      */
     @GetMapping("/getAllStocks")
     public Object getAllStocks() {
-        List<StockSpell> stocks =  stockService.getAllStocks();
+        Object stocks =  stockService.getAllStocks();
         return stocks;
     }
 
@@ -120,5 +117,16 @@ public class StockController {
         jsonObject.put("result", result);
         return jsonObject;
     }
+
+    /**
+     * 更新数据库拼音字段
+     * @return
+     */
+    @GetMapping("/updateAllStocks")
+    public Object updateAllStocks() {
+        return stockService.updateAllStocks();
+    }
+
+
 
 }

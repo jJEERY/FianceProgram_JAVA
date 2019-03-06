@@ -1,13 +1,11 @@
 package com.java.fiance.utils;
 
-/*import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
-import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;*/
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -49,7 +47,7 @@ public class Utils {
      * 获得指定字符串的拼音首字母
      * @param chinese
      * @return
-     *
+     */
     public static String getSpellUpper(String chinese) {
         String pinyinStr = "";
         char[] newChar = chinese.toCharArray();
@@ -61,6 +59,8 @@ public class Utils {
                 continue;
             } else if (i > 0 && newChar[i - 1] == '银' && newChar[i] == '行') {
                 pinyinStr += 'H';
+            } else if ('长' == newChar[i]) {
+                pinyinStr += 'C';
             } else if ('Ａ' == newChar[i]) {
                 pinyinStr += 'A';
             } else if (newChar[i] > 128) {
@@ -74,7 +74,7 @@ public class Utils {
             }
         }
         return pinyinStr.toUpperCase();
-    }*/
+    }
 
 
 }

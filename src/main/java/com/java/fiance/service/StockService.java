@@ -68,4 +68,10 @@ public interface StockService {
      * @return
      */
     boolean checkStock(String userId, String code);
+
+    /**
+     * 更新数据库中所有股票的拼音首字母
+     * @return
+     */
+    int updateAllStocks();
 }

@@ -19,6 +19,8 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,9 +44,16 @@ public class StockServiceImpl implements StockService {
     @Autowired
     private StockMapper stockMapper;
 
+    private static final Logger logger = LoggerFactory.getLogger("StockServiceImpl");
+
     @Override
-    public List<Stock> getStockByUserId(String userId) {
-        return stockMapper.getStockById(userId);
+    public Object getStockByUserId(String userId) {
+        List<Stock> stocks = stockMapper.getStockById(userId);
+        if (stocks == null) {
+            logger.error("getStockByUserId.getStockById.fail");
+            return "暂无自选股";
+        }
+        return stocks;
     }
 
     @Override
@@ -68,18 +77,30 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<StockChosen> getStocksTop20(String userId) {
+    public Object getStocksTop20(String userId) {
         String updateTime = "update_last_time";
         //当天如果是大于10号
         int today = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        logger.debug("getStocksTop20.today->{}", today);
         int ten = 10;
         if (today > ten) {
             updateTime = "update_this_time";
         }
         //获得前20的股票，默认全部非自选
         List<StockChosen> stocksTop20 = stockMapper.getStocksTop20(updateTime);
+        logger.debug("getStocksTop20.stocksTop20->{}", stocksTop20);
+        if (stocksTop20 == null) {
+            logger.error("getStocksTop20.getStocksTop20.Fail");
+            return "获取股票数据出错，请重试!";
+        }
+
         //获得用户自选股
         List<Stock> stocks = stockMapper.getStockById(userId);
+        logger.debug("getStocksTop20.stocks->{}", stocks);
+        if (stocks == null) {
+            logger.error("getStocksTop.getStocksByUserId.Fail");
+            return "获取用户自选股失败!";
+        }
         //使用map和循环获得top20的自选股，不需要修改排列顺序
         HashMap<Integer, StockChosen> hashMap = new HashMap<>(20);
         int i = 0;
@@ -88,7 +109,6 @@ public class StockServiceImpl implements StockService {
             BeanUtils.copyProperties(stock, stockChosen);
             hashMap.put(i++, stockChosen);
         }
-        System.out.println(hashMap.size());
         for (StockChosen stockChosen : stocksTop20) {
             if (hashMap.containsValue(stockChosen)) {
                 stockChosen.setChosen(true);
@@ -98,9 +118,15 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public StockPredict getStockPredict(String code) {
+    public Object getStockPredict(String code) {
         String dataTable = "predict_" + code;
-        StockPredict stockPredict = stockMapper.getStockPredict(dataTable);
+        StockPredict stockPredict;
+        try {
+            stockPredict = stockMapper.getStockPredict(dataTable);
+        }catch (Exception e) {
+            logger.error("getStockPredict.getStockPredict.fail");
+            return "";
+        }
         String now = stockPredict.getDate();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String[] nextDay = new String[5];
@@ -140,7 +166,7 @@ public class StockServiceImpl implements StockService {
         JFreeChart chart = ChartFactory.createLineChart(
                 "", "", "", dataSet,
                 PlotOrientation.VERTICAL, true, false, false);
-        Color color = new Color(29, 34, 40);
+        Color color = new Color(16, 19, 24);
         chart.setBackgroundPaint(color);
         chart.setBorderVisible(false);
         CategoryPlot plot = chart.getCategoryPlot();
@@ -167,7 +193,8 @@ public class StockServiceImpl implements StockService {
         try {
             NumberAxis numberAxis = (NumberAxis) plot.getRangeAxis();
             numberAxis.setAutoRangeIncludesZero(false);
-            OutputStream os = new FileOutputStream("G:/fianceProgram_picture/" + stockPredict.getCode() + ".png");
+            String picture = "picture/" + stockPredict.getCode() + ".png";
+            OutputStream os = new FileOutputStream(picture);
             ChartUtilities.writeChartAsPNG(os, chart, 640, 480);
             os.close();
         } catch (FileNotFoundException e) {
@@ -179,8 +206,12 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<StockSpell> getAllStocks() {
+    public Object getAllStocks() {
         List<StockSpell> list = stockMapper.getAllStocks();
+        if (list == null) {
+            logger.error("getAllStocks.getAllStocks.fail");
+            return "查询股票数据失败!";
+        }
         return list;
     }
 
@@ -194,7 +225,7 @@ public class StockServiceImpl implements StockService {
         }
     }
 
-    /*    @Override
+    @Override
     public int updateAllStocks() {
         //获得修改前的股票
         List<StockSpell> stocks = stockMapper.getAllStocks();
@@ -204,11 +235,15 @@ public class StockServiceImpl implements StockService {
             StockSpell stockSpell = new StockSpell();
 
             BeanUtils.copyProperties(stock, stockSpell);
-            stockSpell.setSpell(Utils.getSpellUpper(stock.getName()));
+            if (Objects.isNull(stock.getSpell())) {
+                logger.info("updateAllStocks.updateStock.spell -> " + stock);
+            }
+            String spell = stock.getSpell() == null ? Utils.getSpellUpper(stock.getName()) : stock.getSpell();
+            stockSpell.setSpell(spell);
             stockSpells.add(stockSpell);
         }
         return stockMapper.updateAllStocks(stockSpells);
-    }*/
+    }
 
 
 }
